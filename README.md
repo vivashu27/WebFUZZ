@@ -20,4 +20,4 @@ Tools based on fuzzing web directories....
 
 -t for no of threads --thread
 
-python webfuzz.py -u http://127.0.0.1/ -e php -w ./wordlist.txt -t 5
+root@test:~python webfuzz.py -u http://127.0.0.1/ -e php -w ./wordlist.txt -t 5
