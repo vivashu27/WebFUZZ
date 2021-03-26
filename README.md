@@ -9,6 +9,7 @@ Tools based on fuzzing web directories....
 
 
 			Web FUZZ by @luffy27
+			     v1.1(updated)
 
 =======================================================================
 
