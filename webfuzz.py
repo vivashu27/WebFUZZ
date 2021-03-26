@@ -1,20 +1,27 @@
+#!/usr/bin/env python2.7
+
 import urllib2
 import os
 import sys
-import Queue
+from queue import Queue
 import requests
 import getopt
 import threading
 from termcolor import colored
+import time
 
+threading.Lock()
+q=Queue()
+tim=0
 def usage():
     print colored("========================================================================\n","green")
     print colored("\t\t\tWeb FUZZ by @luffy27\n","green")
+    print colored("\t\t\t\tv1.1\n","green")
     print colored("=======================================================================\n","green")
     print colored("-u for the url/ --url\n","red")
     print colored("-e for extention --ext\n","red")
     print colored("-w for wordlist --word\n","red")
-    print colored("-t for no of threads --thread","red")
+    print colored("-t for no of threads --thread(use -t 0 if u dont want multi-threading)","red")
     
 def main():
     print("-h or --help for help options")
@@ -39,20 +46,37 @@ def main():
         elif o in ("--thread","-t"):
             thr=sys.argv[-1]
     if(thr==0 and wlist!=""):
+        f=open(wlist,"r")
+        words=f.readlines()    
+        word=list()
+        for w1 in words:
+            w1=w1.rstrip()
+            q.put(str(w1))
+        f.close()
         bruteit(url,ext,wlist,thr)
     elif(thr!=0 and wlist!=""):
-        trd(url,ext,wlist,thr)
+        f=open(wlist,"r")
+        words=f.readlines()
+        word=list()
+        for w1 in words:
+            w1=w1.rstrip()
+            q.put(str(w1))
+        f.close()
+        trd(url,ext,wlist,thr)   
         
-def bruteit(u,e,w,t):
-    f=open(w,"rb")
-    words=f.readlines()
-    f.close()
-    word=list()
-    for w1 in words:
-        w1=w1.rstrip()
-        word.append(w1)
+def trd(url,ext,wlist,thr):
     try:
-        for lst in word:   
+        
+        for i in range(int(thr)):
+            t=threading.Thread(target=bruteit,args=(url,ext,wlist))
+            t.start()
+    except Exception as e:
+        print(e)
+        
+def bruteit(u,e,w):
+    try:
+        while not q.empty():   
+            lst=str(q.get())
             req=requests.get(u+lst)
             if req.status_code==200 or req.status_code==302:
                     print(str(req.status_code)+":"+lst)
@@ -62,10 +86,7 @@ def bruteit(u,e,w,t):
     except Exception as err:
         print("fuck not wroking\n",err)
 
-def trd(url,ext,wlist,thr):
-    for i in range(int(thr)):
-        t=threading.Thread(target=bruteit,args=(url,ext,wlist,thr))
-        t.start()
+
         
 main()
 
